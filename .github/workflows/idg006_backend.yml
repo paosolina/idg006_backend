@@ -1,0 +1,58 @@
+name: IDG006_BACKEND Notify
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  notify-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Push Notification to Telegram
+        run: |
+          MESSAGE="🔔 *មានការផ្លាស់ប្ដូរ Code ថ្មី*
+          👤 Author: ${{ github.actor }}
+          📦 Repo: ${{ github.repository }}
+          🌿 Branch: ${{ github.ref_name }}
+          💬 Commit: ${{ github.event.head_commit.message }}
+          🔗 ${{ github.event.head_commit.url }}"
+
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d parse_mode="Markdown" \
+            -d text="$MESSAGE"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: notify-push
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Placeholder build step
+        run: echo "Replace this with your actual build/test commands"
+
+      - name: Notify Success
+        if: success()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d parse_mode="Markdown" \
+            -d text="✅ *Build ជោគជ័យ!*
+          📦 Repo: ${{ github.repository }}
+          🌿 Branch: ${{ github.ref_name }}
+          👤 Triggered by: ${{ github.actor }}"
+
+      - name: Notify Failure
+        if: failure()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d parse_mode="Markdown" \
+            -d text="❌ *Build បរាជ័យ!*
+          📦 Repo: ${{ github.repository }}
+          🌿 Branch: ${{ github.ref_name }}
+          👤 Triggered by: ${{ github.actor }}
+          🔗 មើលលម្អិត: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
