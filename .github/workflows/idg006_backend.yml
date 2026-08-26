@@ -12,17 +12,13 @@ jobs:
     steps:
       - name: Send Push Notification to Telegram
         run: |
-          MESSAGE="🔔 *មានការផ្លាស់ប្ដូរ Code ថ្មី*
-          👤 Author: ${{ github.actor }}
-          📦 Repo: ${{ github.repository }}
-          🌿 Branch: ${{ github.ref_name }}
-          💬 Commit: ${{ github.event.head_commit.message }}
-          🔗 ${{ github.event.head_commit.url }}"
-
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d parse_mode="Markdown" \
-            -d text="$MESSAGE"
+            -H "Content-Type: application/json" \
+            -d '{
+              "chat_id": "${{ secrets.TELEGRAM_CHAT_ID }}",
+              "parse_mode": "HTML",
+              "text": "🔔 <b>មានការផ្លាស់ប្ដូរ Code ថ្មី</b>\n👤 <b>Author:</b> ${{ github.actor }}\n📦 <b>Repo:</b> ${{ github.repository }}\n🌿 <b>Branch:</b> ${{ github.ref_name }}\n💬 <b>Commit:</b> ${{ github.event.head_commit.message }}\n🔗 <a href=\"${{ github.event.head_commit.url }}\">View Commit</a>"
+            }'
 
   build:
     runs-on: ubuntu-latest
@@ -38,21 +34,20 @@ jobs:
         if: success()
         run: |
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d parse_mode="Markdown" \
-            -d text="✅ *Build ជោគជ័យ!*
-          📦 Repo: ${{ github.repository }}
-          🌿 Branch: ${{ github.ref_name }}
-          👤 Triggered by: ${{ github.actor }}"
+            -H "Content-Type: application/json" \
+            -d '{
+              "chat_id": "${{ secrets.TELEGRAM_CHAT_ID }}",
+              "parse_mode": "HTML",
+              "text": "✅ <b>Build ជោគជ័យ!</b>\n📦 <b>Repo:</b> ${{ github.repository }}\n🌿 <b>Branch:</b> ${{ github.ref_name }}\n👤 <b>Triggered by:</b> ${{ github.actor }}"
+            }'
 
       - name: Notify Failure
         if: failure()
         run: |
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d parse_mode="Markdown" \
-            -d text="❌ *Build បរាជ័យ!*
-          📦 Repo: ${{ github.repository }}
-          🌿 Branch: ${{ github.ref_name }}
-          👤 Triggered by: ${{ github.actor }}
-          🔗 មើលលម្អិត: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            -H "Content-Type: application/json" \
+            -d '{
+              "chat_id": "${{ secrets.TELEGRAM_CHAT_ID }}",
+              "parse_mode": "HTML",
+              "text": "❌ <b>Build បរាជ័យ!</b>\n📦 <b>Repo:</b> ${{ github.repository }}\n🌿 <b>Branch:</b> ${{ github.ref_name }}\n👤 <b>Triggered by:</b> ${{ github.actor }}\n🔗 <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">មើលលម្អិត</a>"
+            }'
