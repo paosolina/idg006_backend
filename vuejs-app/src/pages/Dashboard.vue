@@ -4,7 +4,7 @@
         <br />
         {{ userStore.email }}
         <br />
-        You are logged in successfully. This is your dashboard.
+        You are logged in successfully. 
         <RouterLink :to="{ name: 'auth.signout' }"
             ><i class="fas fa-sign-out-alt text-danger"></i
         ></RouterLink>
