@@ -5,6 +5,7 @@ namespace App\Http\Requests\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+
 class SignupRequest extends FormRequest
 {
     /**
@@ -26,6 +27,7 @@ class SignupRequest extends FormRequest
             'name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'callback_url' => 'required|url'
         ];
     }
 }
