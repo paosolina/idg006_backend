@@ -130,7 +130,10 @@ function resetAllState() {
 async function signUp() {
     try {
         LoadingModal("Signing Up...");
-        await apiSignUp(user);
+        await apiSignUp({
+            ...user,
+            callback_url: `${window.location.origin}/verify-email`,
+        });
         resetAllState();
         return MessageModal(
             {
