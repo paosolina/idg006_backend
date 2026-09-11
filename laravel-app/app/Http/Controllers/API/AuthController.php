@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Http\Requests\User\SignupRequest;
 use App\Http\Requests\User\SigninRequest;
+use App\Http\Requests\User\SendVerificationEmailRequest;
 use App\Http\Resources\User\UserResource;
+
 
 
 class AuthController extends Controller
@@ -22,11 +24,14 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-        
+
+
+        $user->sendEmailVerificationNotification($request->callback_url);
+
         return response()->json([
             "message" => "User created successfully",
             'user' => new UserResource($user)
-        ],201);
+        ], 201);
     }
 
     public function signin(SigninRequest $request)
@@ -61,6 +66,30 @@ class AuthController extends Controller
         return response()->json([
             "user" => new UserResource($request->user()),
             "message" => "User verified successfully"
+        ],200);
+    }
+    function sendVerificationEmail(SendVerificationEmailRequest $request){
+        $user = User::where('email', $request->email)->first();
+        if ($user->hasVerifiedEmail()) {
+            throw ValidationException::withMessages([
+                'email' => 'User already verified',
+            ]);
+        }
+        $user->sendEmailVerificationNotification($request->callback_url);
+        return response()->json([
+            "message" => "Email verification sent successfully"
+        ],200);
+    }
+    function verifyEmail(Request $request){
+        $user = User::findOrFail($request->route('id'));
+        if ($user->hasVerifiedEmail()) {
+            throw ValidationException::withMessages([
+                'email' => 'User already verified',
+            ]);
+        }
+        $user->markEmailAsVerified();
+        return response()->json([
+            "message" => "Email verified successfully"
         ],200);
     }
 }
