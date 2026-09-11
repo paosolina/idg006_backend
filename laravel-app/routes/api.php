@@ -19,3 +19,6 @@ Route::get('/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
     ->middleware('signed')
     ->name('verify.mail');
 Route::post('/send/verification-email', [AuthController::class, 'sendVerificationEmail']);
+
+Route::post('/send/reset-password-email', [AuthController::class, 'sendResetPasswordEmail']);
+Route::post('/set/new-password', [AuthController::class, 'setNewPassword'])->name('set.new-password');
